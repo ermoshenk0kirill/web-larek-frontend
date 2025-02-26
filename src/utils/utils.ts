@@ -133,3 +133,10 @@ export function createElement<
     }
     return element;
 }
+
+
+// utils.ts (или в любом другом подходящем месте)
+export function addIndexToCard(cardContainer: HTMLElement, index: number): void {
+    const indexElement = ensureElement<HTMLElement>('.basket__item-index', cardContainer);
+    indexElement.textContent = String(index + 1);
+  }

@@ -5,54 +5,53 @@ export interface ICard {
   description: string;
   image: string;
   category: string;
-  price: number;
+  price: number | null;//
 
   id: string;
 }
+// интерфейс главной страницы
+export interface ICardsData {
+  cards: ICard[], // массив карточек
+  setPreview(cardId: ICard): void;
+  getCard(id: string): ICard; // получить карточку по id
+}
 
+// интерфейс корзины
+export interface IBasketData {
+  basketCards: IBasket[];
+  addCard(card: ICard): void;
+  removeCard(card: IBasket): void;
+  getCards(): IBasket[];
+  getTotalPrice(): number;
+  checkCard(card: IBasket): boolean;
+  getCount(): number;
+  getCardsId(): string[];
+  clearBasket(): void;
+}
+
+export interface IBasketView {
+  items: HTMLElement[];
+  total: string;
+  itemsBasket: string[];
+}
+
+// тип для модального окна корзины
+export type IBasket = Pick<ICard, 'title' | 'id' | 'price'>
 
 // интерфейс данных пользователя
 export interface IUserData {
-  payment: string; //способ оплаты
+  payment: 'cash' | 'card'; //способ оплаты
   address: string;
   phone: string;
   mail: string;
 }
 
-// интерфейс главной страницы
-export interface ICardList {
-  cards: ICard[], // массив карточек
-  cardId: string // id карточки
-
-  getCardId(id: string): ICard; // получить карточку по id
-}
-
-// интерфейс корзины
-export interface IBasket {
-  cards: ICard[],
-  totalPrice: number
-}
-
-// интерфейс оплаты 
-export interface IUserPayment {
-  setInfoPayment(data: IPayment): void; // установить данные оплаты
-  setValidation(data: Record<keyof IPayment, string>): boolean; // проверка данных оплаты
-}
-
-export interface IUserContact {
-  setInfoContact(data: IContactInfo): void; // установить данные контактов
-  setValidation(data: Record<keyof IContactInfo, string>): boolean; // проверка данных контактов
-}
-
-
 // тип обычной карточки списка
-export type IListCard = Pick<ICard, 'title' | 'image' | 'category' | 'price'>
+export type ICardList = Pick<ICard, 'title' | 'image' | 'category' | 'price'>
 
 // тип для модального окна карточки
+//-=-=- под вопрос (снизу) надо писать или не надо =-=-=-=-=-=-
 export type ICardInfo = Pick<ICard, 'title' | 'description' | 'image' | 'category'>
-
-// тип для модального окна корзины
-export type IDeleteBasket = Pick<ICard, 'title' | 'description' | 'price'>
 
 //------------------------------------------------------------
 // ТИПЫ для информации о пользователе
@@ -67,3 +66,28 @@ export type IContactInfo = Pick<IUserData, 'mail' | 'phone'>
 
 // тип для успешного заказа
 export type Successful = string;
+
+// тип для API
+export type ApiMethods = 'POST' | 'GET' |  'DELETE';
+
+export interface IOrderResult {
+  id: string;
+  total: number;
+}
+
+export interface IOrderForm {
+  name: string;
+  phone: string;
+  mail: string;
+  address: string;
+  total: number;
+}
+
+export interface IOrder extends IOrderForm {
+  items: string[];
+  total: number;
+}
+
+export interface ICardAction {
+  onClick(event: MouseEvent): void
+}

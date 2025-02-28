@@ -1,19 +1,17 @@
-
-// интерфейс карточки
 export interface ICard {
   title: string;
   description: string;
   image: string;
   category: string;
-  price: number | null;//
-
+  price: number | null;
+  buttonText: boolean;
   id: string;
 }
-// интерфейс главной страницы
+
 export interface ICardsData {
-  cards: ICard[], // массив карточек
+  cards: ICard[],
   setPreview(cardId: ICard): void;
-  getCard(id: string): ICard; // получить карточку по id
+  getCard(id: string): ICard;
 }
 
 // интерфейс корзины
@@ -36,39 +34,13 @@ export interface IBasketView {
 }
 
 // тип для модального окна корзины
-export type IBasket = Pick<ICard, 'title' | 'id' | 'price'>
 
-// интерфейс данных пользователя
 export interface IUserData {
-  payment: 'cash' | 'card'; //способ оплаты
-  address: string;
-  phone: string;
-  mail: string;
+  getUserInfo(field: keyof IOrderForm): void;
+  setInputField(field: keyof IOrderForm, value: string): void;
+  validation(): void;
+  clearUser(): void;
 }
-
-// тип обычной карточки списка
-export type ICardList = Pick<ICard, 'title' | 'image' | 'category' | 'price'>
-
-// тип для модального окна карточки
-//-=-=- под вопрос (снизу) надо писать или не надо =-=-=-=-=-=-
-export type ICardInfo = Pick<ICard, 'title' | 'description' | 'image' | 'category'>
-
-//------------------------------------------------------------
-// ТИПЫ для информации о пользователе
-
-// тип для модального окна оплаты
-export type IPayment = Pick<IUserData, 'address' | 'payment'>
-
-// тип для модального окна контактов
-export type IContactInfo = Pick<IUserData, 'mail' | 'phone'>
-
-//------------------------------------------------------------
-
-// тип для успешного заказа
-export type Successful = string;
-
-// тип для API
-export type ApiMethods = 'POST' | 'GET' |  'DELETE';
 
 export interface IOrderResult {
   id: string;
@@ -76,11 +48,10 @@ export interface IOrderResult {
 }
 
 export interface IOrderForm {
-  name: string;
+  email: string;
   phone: string;
-  mail: string;
   address: string;
-  total: number;
+  payment: string;
 }
 
 export interface IOrder extends IOrderForm {
@@ -91,3 +62,11 @@ export interface IOrder extends IOrderForm {
 export interface ICardAction {
   onClick(event: MouseEvent): void
 }
+
+export type ICardList = Pick<ICard, 'title' | 'image' | 'category' | 'price'>
+export type IBasket = Pick<ICard, 'title' | 'id' | 'price'>
+export type ICardInfo = Pick<ICard, 'title' | 'description' | 'image' | 'category'>
+export type IInfo = Pick<IOrderForm, 'email' | 'phone' | 'address' | 'payment'>
+export type Successful = string;
+export type ApiMethods = 'POST' | 'GET' |  'DELETE';
+export type FormErrors = Partial<Record<keyof IOrderForm, string>>;

@@ -1,4 +1,4 @@
-import { ICard, ICardsData, ICardList} from "../../../src/types/index";
+import { ICard, ICardsData} from "../../../src/types/index";
 import { IEvents } from "../base/events";
 
 

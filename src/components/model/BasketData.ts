@@ -13,19 +13,18 @@ export class BasketData implements IBasketData {
 
   // добавление карточки в корзину
   public addCard(card: ICard): void {
+    if (!this.basketCards.some(item => item.id === card.id)) {
     const basketItem: IBasket = {
       title: card.title,
       id: card.id,
       price: card.price
     }
-    this.basketCards.push(basketItem);
-    // this.events.emit('basket:add', basketItem);
+    this.basketCards.push(basketItem);}
   }
 
   // удаление товара из корзины
   public removeCard(card: IBasket): void {
-    this.basketCards = this.basketCards.filter(item => item.id !== card.id) // оставляет только те, у которых id не совпадает с id выбранной карточкой
-    // this.events.emit('basket:remove', this.basketCards)
+    this.basketCards = this.basketCards.filter(item => item.id !== card.id)
   }
 
   // возвращает массив карточек коризны

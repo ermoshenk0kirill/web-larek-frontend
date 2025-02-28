@@ -2,7 +2,7 @@ import {Component} from "../base/components";
 import {IEvents} from "../base/events";
 import {ensureElement} from "../../utils/utils";
 
-interface IFormState {
+export interface IFormState {
     valid: boolean;
     errors: string;
 }
@@ -22,6 +22,7 @@ export class Form<T> extends Component<IFormState> {
             const field = target.name as keyof T;
             const value = target.value;
             this.onInputChange(field, value);
+
         });
 
         this.container.addEventListener('submit', (e: Event) => {
@@ -35,6 +36,11 @@ export class Form<T> extends Component<IFormState> {
             field,
             value
         });
+
+        // Проверяем, пустое ли поле, и обновляем валидность формы
+        if (field === 'address') {
+        this.valid = value.trim().length > 0;
+        }
     }
 
     set valid(value: boolean) {
@@ -45,11 +51,29 @@ export class Form<T> extends Component<IFormState> {
         this.setText(this._errors, value);
     }
 
+    get errors() {
+        return this._errors.textContent;
+    }
+
     render(state: Partial<T> & IFormState) {
         const {valid, errors, ...inputs} = state;
         super.render({valid, errors});
         Object.assign(this, inputs);
         return this.container;
 
+    }
+
+    updateForm() {
+        const inputs = this.container.querySelectorAll('input');
+		inputs.forEach((input) => (input.value = ''));
+		this.errors = '';
+		this.valid = false;
+    }
+
+    clearForm() {
+        const inputs = this.container.querySelectorAll('input');
+        inputs.forEach((input) => (input.value = ''));
+        this.errors = '';
+        this.valid = false;
     }
 }

@@ -1,50 +1,58 @@
-import {IUserData} from '../../types/index'
+import {IOrder, IUserData} from '../../types/index'
 import {IEvents} from '../base/events'
-
+import {IOrderForm, FormErrors, IInfo,} from '../../types/index'
 export class UserData implements IUserData {
-  payment: 'cash' | 'card';
-  address: string;
-  phone: string;
-  mail: string;
-
-  private events: IEvents; 
+  protected events: IEvents; 
+  protected order: IOrderForm = {
+    payment: '',
+    address: '',
+    phone: '',
+    email: ''
+  };
 
   constructor(events: IEvents) {
     this.events = events;
-    this.payment = 'cash';
-    this.address = '';
-    this.phone = '';
-    this.mail = '';
+    this.order = {
+      payment: '',
+      address: '',
+      phone: '',
+      email: ''
+    }
   }
 
-  // метод сохранения данных пользователя
-  saveUserData(userData: IUserData): void {
-    this.payment = userData.payment;
-    this.address = userData.address;
-    this.phone = userData.phone;
-    this.mail = userData.mail;
-
-    this.events.emit('user:save', this.getUserData());
+  getUserInfo() {
+    return this.order;
   }
 
-  // метод получения данных пользователя
-  getUserData(): IUserData {
-    return {
-      payment: this.payment,
-      address: this.address,
-      phone: this.phone,
-      mail: this.mail
-    };
-  }
+  setInputField(field: keyof IOrderForm, value: string) {
+    this.order[field] = value;
+    this.events.emit('order:change', this.order);
 
-  // метод валидации данных пользователя
-  validateUserData(): boolean {
-    const phoneRegex = /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  };
 
-    return (this.payment === 'cash' || this.payment === 'card') &&
-    this.address.length > 0 &&
-    phoneRegex.test(this.phone) &&
-    emailRegex.test(this.mail);
-  }
+  validation() {
+    const errors : FormErrors = {};
+    if (!this.order.email) {
+      errors.email = 'Укажите почту';
+    }
+    if (!this.order.phone) {
+        errors.phone = 'Укажите телефон';
+    }
+    if (!this.order.address) {
+      errors.address = 'Укажите адресс';
+    }
+    if (!this.order.payment) {
+      errors.payment = 'Выберите способ оплаты';
+    }
+    return  errors;
+  };
+
+  clearUser() {
+    this.order = {
+      payment: '',
+      address: '',
+      phone: '',
+      email: ''
+    }
+  };
 }

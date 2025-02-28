@@ -14,8 +14,8 @@ export class Card extends Component<ICard> {
 	protected description: HTMLElement;
 	protected image: HTMLImageElement;
 	protected price: HTMLElement;
-	protected button: HTMLElement;
-	protected deleteButton: HTMLElement;
+	protected button: HTMLButtonElement;
+	protected deleteButton: HTMLButtonElement;
 	protected basketIndex: HTMLElement;
 	protected categoryColor: Record<string, string> = {
 		'софт-скил': '_soft',
@@ -42,7 +42,7 @@ export class Card extends Component<ICard> {
         // Если есть кнопка "Добавить в корзину"
     if (this.button) {
       this.button.addEventListener('click', () => {
-          this.events.emit('basket:add', { id: this.id });
+          this.events.emit('basket:add', { id: this.id, buyCheck: this.updateButtonName() });
       });
     }
 
@@ -88,6 +88,10 @@ export class Card extends Component<ICard> {
 		}
 	}
 
+	set valid(value: boolean) {
+		this.button.disabled = !value;
+}
+
 	set idValue(value: string) {
 		this.id = value;
 	}
@@ -96,11 +100,14 @@ export class Card extends Component<ICard> {
 		return this.id;
 	}
 
-	updateButtonState(isInBasket: boolean): void {
-    if (this.button) {
-      this.setDisabled(this.button, isInBasket);
-      this.button.textContent = isInBasket ? 'В корзине' : 'Купить';
-    }
+	updateButtonName() {
+		this.button.classList.toggle('card__button-buy_inactive')
+		if (this.button.classList.contains('card__button-buy_inactive')) {
+				this.button.disabled = true;
+		}
   }
 
+	updateButtonState(isDisabled: boolean) {
+    this.button.disabled = isDisabled;
+}
 }

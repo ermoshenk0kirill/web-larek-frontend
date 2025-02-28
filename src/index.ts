@@ -13,7 +13,7 @@ import { Basket } from './components/view/Basket';
 import { PaymentInfo } from './components/view/PaymentInfo';
 import { UserInfo } from './components/view/UserInfo';
 import { Success } from './components/view/Success';
-import { ICard, IOrderForm} from "./types";
+import { ICard, IOrderForm } from './types';
 
 const events = new EventEmitter();
 const api = new AppApi(API_URL, CDN_URL, settings);
@@ -40,7 +40,7 @@ const renderedCards = new Map<string, Card>();
 
 events.onAll((event) => {
 	console.log(event.eventName, event.data);
-})
+});
 
 // получаем список карточек с сервера
 api
@@ -51,42 +51,41 @@ api
 	})
 	.catch((error) => console.error('Ошибка загрузки карточек:', error));
 
-
-	//рендеринг карточек товаров
-	events.on('cards:render', () => {
-		cardData.cards.forEach(item => {
-			const card = new Card(cloneTemplate(cardTemplate), events)
-			card.categoryValue = item.category;
-			card.titleValue = item.title;
-			card.descriptionValue = item.description;
-			card.imageValue = item.image;
-			card.priceValue = item.price;
-			card.idValue = item.id;
-			ensureElement<HTMLElement>('.gallery').append(card.render(item));
-		});
-}
-)
+//рендеринг карточек товаров
+events.on('cards:render', () => {
+	cardData.cards.forEach((item) => {
+		const card = new Card(cloneTemplate(cardTemplate), events);
+		card.categoryValue = item.category;
+		card.titleValue = item.title;
+		card.descriptionValue = item.description;
+		card.imageValue = item.image;
+		card.priceValue = item.price;
+		card.idValue = item.id;
+		ensureElement<HTMLElement>('.gallery').append(card.render(item));
+	});
+});
 
 // если открыто модальное окно, то блокируем прокрутку страницы
 events.on('modal:open', () => {
 	page.locked = true;
-})
+});
 
 // если модальное окно закрыто, то разблокируем прокрутку страницы
 events.on('modal:close', () => {
 	page.locked = false;
-})
+});
 
 events.on('card:open', (cardId: ICard) => {
 	const card = cardData.getCard(cardId.id);
 	if (card) {
-			console.log('выбрана карточка:', card);
-			cardData.setPreview(card);
-}});
+		console.log('выбрана карточка:', card);
+		cardData.setPreview(card);
+	}
+});
 
 events.on('preview:render', (card: ICard) => {
 	const cardPreview = new Card(cloneTemplate(cardPreviewTemplate), events);
-	
+
 	const isInBasket = basketData.getCards().some((item) => item.id === card.id);
 	cardPreview.valid = !isInBasket;
 
@@ -106,130 +105,149 @@ events.on('basket:open', () => {
 
 events.on('counter:update', () => {
 	page.setCounter(basketData.getCount());
-})
+});
 
 // Добавление карточки в корзину
 events.on('basket:add', (data: { id: string }) => {
-    const card = cardData.getCard(data.id);
-    if (card) {
-        basketData.addCard(card);
-        events.emit('basket:update');
-        events.emit('counter:update');
-        const renderedCard = renderedCards.get(data.id);
-        if (renderedCard) {
-            renderedCard.updateButtonName();
-        }
-    }
+	const card = cardData.getCard(data.id);
+	if (card) {
+		basketData.addCard(card);
+		events.emit('basket:update');
+		events.emit('counter:update');
+		const renderedCard = renderedCards.get(data.id);
+		if (renderedCard) {
+			renderedCard.updateButtonName();
+		}
+	}
 });
 
 // Удаление карточки из корзины
 events.on('basket:remove', (data: { id: string }) => {
-    const card = cardData.getCard(data.id);
-    if (card) {
-        basketData.removeCard(card);
-        events.emit('basket:update');
-        events.emit('counter:update');
-        const renderedCard = renderedCards.get(data.id);
-        if (renderedCard) {
-            renderedCard.updateButtonName();  // Меняем текст обратно
-        }
-    }
+	const card = cardData.getCard(data.id);
+	if (card) {
+		basketData.removeCard(card);
+		events.emit('basket:update');
+		events.emit('counter:update');
+		const renderedCard = renderedCards.get(data.id);
+		if (renderedCard) {
+			renderedCard.updateButtonName(); // Меняем текст обратно
+		}
+	}
 });
 
-	// Обработчик для обновления корзины
+// Обработчик для обновления корзины
 events.on('basket:update', () => {
 	const cards = basketData.getCards();
 	const totalPrice = basketData.getTotalPrice();
-	
-	const basketItems = cards.map((card, index) => {
-			const cardElement = new Card(cloneTemplate(cardBasketTemplate), events);
-			cardElement.titleValue = card.title;
-			cardElement.priceValue = card.price;
-			cardElement.idValue = card.id;
-	
-			addIndexToCard(cardElement.container, index);
 
-			return cardElement.render(card);
-		});
-	
-		basket.items = basketItems;
-		basket.total = totalPrice;
+	const basketItems = cards.map((card, index) => {
+		const cardElement = new Card(cloneTemplate(cardBasketTemplate), events);
+		cardElement.titleValue = card.title;
+		cardElement.priceValue = card.price;
+		cardElement.idValue = card.id;
+
+		addIndexToCard(cardElement.container, index);
+
+		return cardElement.render(card);
 	});
 
-events.on('order:open', () => {
-	const { address: addressError, payment: paymentError } = userData.validation();
-	const { address, payment } = userData.getUserInfo();
-  modal.render({
-      content: paymentInfo.render({
-        address: userData.getUserInfo().address,
-        payment: userData.getUserInfo().payment,
-        valid: !(addressError || paymentError),
-        errors: !(address || payment) ? '' : Object.values({paymentError, addressError}).filter(i => !!i).join('; ')
-    })
-  });
+	basket.items = basketItems;
+	basket.total = totalPrice;
 });
 
+events.on('order:open', () => {
+	const { address: addressError, payment: paymentError } =
+		userData.validation();
+	const { address, payment } = userData.getUserInfo();
+	modal.render({
+		content: paymentInfo.render({
+			address: userData.getUserInfo().address,
+			payment: userData.getUserInfo().payment,
+			valid: !(addressError || paymentError),
+			errors: !(address || payment)
+				? ''
+				: Object.values({ paymentError, addressError })
+						.filter((i) => !!i)
+						.join('; '),
+		}),
+	});
+});
 
 // Открыть форму заказа
 events.on('contacts:open', () => {
-  const { phone: phoneError, email: mailError } = userData.validation();
-  const { phone, email } = userData.getUserInfo();
+	const { phone: phoneError, email: mailError } = userData.validation();
+	const { phone, email } = userData.getUserInfo();
 	modal.render({
-      content: user.render({
-        phone: userData.getUserInfo().phone,
-        email: userData.getUserInfo().email,
-        valid: !(phoneError && mailError),
-        errors: !(phone && email) ? '' : Object.values({phoneError, mailError}).filter(i => !!i).join('; ')
-    })
-  });
-})
+		content: user.render({
+			phone: userData.getUserInfo().phone,
+			email: userData.getUserInfo().email,
+			valid: !(phoneError && mailError),
+			errors: !(phone && email)
+				? ''
+				: Object.values({ phoneError, mailError })
+						.filter((i) => !!i)
+						.join('; '),
+		}),
+	});
+});
 
 // Изменилось состояние валидации формы
 events.on('user:changed', (errors: Partial<IOrderForm>) => {
-  const { address, payment, phone, email } = userData.validation();
-  paymentInfo.valid = !(address || payment);
-  paymentInfo.errors = Object.values({address, payment}).filter(i => !!i).join('; ');
-  paymentInfo.valid = !(phone || email);
-  paymentInfo.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+	const { address, payment, phone, email } = userData.validation();
+	paymentInfo.valid = !(address || payment);
+	paymentInfo.errors = Object.values({ address, payment })
+		.filter((i) => !!i)
+		.join('; ');
+	paymentInfo.valid = !(phone || email);
+	paymentInfo.errors = Object.values({ phone, email })
+		.filter((i) => !!i)
+		.join('; ');
 });
 
-events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
-	userData.setInputField(data.field, data.value);
-});
+events.on(
+	/^order\..*:change/,
+	(data: { field: keyof IOrderForm; value: string }) => {
+		userData.setInputField(data.field, data.value);
+	}
+);
 
-events.on(/^contacts\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
-	userData.setInputField(data.field, data.value);
-	user.validateForm();
-});
+events.on(
+	/^contacts\..*:change/,
+	(data: { field: keyof IOrderForm; value: string }) => {
+		userData.setInputField(data.field, data.value);
+		user.validateForm();
+	}
+);
 
 events.on('contacts:submit', () => {
-	let totalAmountFinall = 0
-	const cardsInOrder: string[] = []
-	basketData.basketCards.forEach((card) => cardsInOrder.push(card.id))
-	api.orderLots({
+	let totalAmountFinall = 0;
+	const cardsInOrder: string[] = [];
+	basketData.basketCards.forEach((card) => cardsInOrder.push(card.id));
+	api
+		.orderLots({
 			payment: userData.getUserInfo().payment,
 			address: userData.getUserInfo().address,
 			email: userData.getUserInfo().email,
 			phone: userData.getUserInfo().phone,
 			total: basketData.getTotalPrice(),
 			items: cardsInOrder,
-	})
-			.then((answerOrder) => {
-					totalAmountFinall = answerOrder.total
-					modal.render({ content: success.render({ total: totalAmountFinall }) })
-					basketData.clearBasket();
-					paymentInfo.clearAll();
-					user.clearAll();
-					page.setCounter(basketData.basketCards.length);
-					paymentInfo.clearForm();
-					user.clearForm();
-					basket.clearBasket();
-			})
-			.catch((err) => {
-					console.log('Ошибка оформления заказа', err)
-			})
-})
+		})
+		.then((answerOrder) => {
+			totalAmountFinall = answerOrder.total;
+			modal.render({ content: success.render({ total: totalAmountFinall }) });
+			basketData.clearBasket();
+			paymentInfo.clearAll();
+			user.clearAll();
+			page.setCounter(basketData.basketCards.length);
+			paymentInfo.clearForm();
+			user.clearForm();
+			basket.clearBasket();
+		})
+		.catch((err) => {
+			console.log('Ошибка оформления заказа', err);
+		});
+});
 
 events.on('success:close', () => {
 	modal.close();
-})
+});

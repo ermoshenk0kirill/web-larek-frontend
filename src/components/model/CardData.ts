@@ -1,37 +1,36 @@
-import { ICard, ICardsData} from "../../../src/types/index";
-import { IEvents } from "../base/events";
-
+import { ICard, ICardsData } from '../../../src/types/index';
+import { IEvents } from '../base/events';
 
 export class CardData implements ICardsData {
-  protected _cards: ICard[];
-  protected _preview: string | null;
-  protected events: IEvents;
+	protected _cards: ICard[];
+	protected _preview: string | null;
+	protected events: IEvents;
 
-  constructor(events: IEvents) {
-    this.events = events;
-  }
-  
-  // устанавливает список карточек
-  set cards(cards:ICard[]) {
-    this._cards = cards;
-    this.events.emit('cards:render')
-}
+	constructor(events: IEvents) {
+		this.events = events;
+	}
 
-// возвращает список карточек
-  get cards () {
-    return this._cards;
-  }
+	// устанавливает список карточек
+	set cards(cards: ICard[]) {
+		this._cards = cards;
+		this.events.emit('cards:render');
+	}
 
-  getCard(cardId: string) {
-    return this._cards.find((item) => item.id === cardId)
-}
+	// возвращает список карточек
+	get cards() {
+		return this._cards;
+	}
 
-  setPreview(cardId: ICard) {
-        this._preview = cardId.id;
-        this.events.emit('preview:render', cardId)
-}
+	getCard(cardId: string) {
+		return this._cards.find((item) => item.id === cardId);
+	}
 
-  getPreview () {
-    return this._preview;
-  }
+	setPreview(cardId: ICard) {
+		this._preview = cardId.id;
+		this.events.emit('preview:render', cardId);
+	}
+
+	getPreview() {
+		return this._preview;
+	}
 }
